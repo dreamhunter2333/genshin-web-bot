@@ -1,3 +1,6 @@
 [submodule "Yunzai-Bot"]
 	path = Yunzai-Bot
 	url = https://gitee.com/Le-niao/Yunzai-Bot.git
+[submodule "miao-plugin"]
+	path = miao-plugin
+	url = https://gitee.com/yoimiya-kokomi/miao-plugin.git
