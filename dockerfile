@@ -26,7 +26,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /app/Yunzai-Bot
 COPY Yunzai-Bot /app/Yunzai-Bot
-RUN pnpm install
+RUN pnpm install -P
 COPY dist/ /app/Yunzai-Bot/web-data/
 COPY config /app/Yunzai-Bot/config
 

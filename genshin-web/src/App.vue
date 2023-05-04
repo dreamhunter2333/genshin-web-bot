@@ -63,7 +63,7 @@ onMounted(() => {
                 <n-input-number v-model:value="uid" :min="100000000" :max="900000000" placeholder="请输入UID" />
               </n-form-item>
               <n-form-item label="指令" label-placement="left">
-                <n-input v-model:value="command" type="text" maxlength="20" placeholder="#帮助" />
+                <n-input v-model:value="command" type="textarea" placeholder="#帮助" />
               </n-form-item>
             </div>
             <div class="button-container">
