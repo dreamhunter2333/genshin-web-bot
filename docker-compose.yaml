@@ -1,0 +1,31 @@
+version: '3'
+services:
+
+  genshin-bot-web:
+    image: ghcr.io/dreamhunter2333/genshin-bot-web:latest
+    build:
+      context: .
+      dockerfile: dockerfile
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./data/yunzai-web/data:/app/Yunzai-Bot/data
+      - ./data/yunzai-web/web-data/images:/app/Yunzai-Bot/web-data/images
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - ./data/redis/data:/data
+      - ./data/redis/logs:/logs
+    healthcheck:
+      test: [ "CMD", "redis-cli", "PING" ]
+      start_period: 10s
+      interval: 5s
+      timeout: 1s
