@@ -10,6 +10,135 @@ index a66b0f6..da84d1d 100644
 \ No newline at end of file
 +yunzai
 +web-data
+diff --git a/index.js b/index.js
+new file mode 100644
+index 0000000..924f72a
+--- /dev/null
++++ b/index.js
+@@ -0,0 +1,123 @@
++/* eslint-disable */
++import path from 'path';
++import * as fs from 'fs/promises'
++import { v4 as uuidv4 } from 'uuid';
++
++import './lib/config/init.js'
++import PluginsLoader from './lib/plugins/loader.js'
++
++import Fastify from 'fastify'
++import * as fstatic from '@fastify/static'
++import cors from '@fastify/cors'
++
++fs.mkdir('./web-data/images', { recursive: true })
++
++global.Bot = {}
++await PluginsLoader.load()
++
++const fastify = Fastify({
++    logger: true
++})
++fastify.register(cors, {
++    origin: ['http://localhost:5173',],
++})
++
++const __dirname = path.resolve();
++fastify.register(fstatic, {
++    root: __dirname + '/web-data',
++    prefix: '/'
++})
++
++async function generateResponse(user_id, text) {
++    const e = createEvent(user_id, text)
++
++    e.group.pickMember = (qq) => { }
++    e.group.sendMsg = (msg) => logger.info(`group 回复内容 = ${msg}`)
++
++    const replies = []
++    e.reply = async (msg) => {
++        logger.info(`reply 回复内容 = ${msg}`)
++        if (msg.type == 'image') {
++            const fileName = `${uuidv4()}.jpg`
++            const filePath = `./web-data/images/${fileName}`
++            fs.writeFile(filePath, msg.file, 'binary')
++            replies.push(`![img](./images/${fileName})`)
++        } else if (typeof msg == 'string') {
++            replies.push(`${msg}`)
++        } else {
++            logger.error(`unsupported msg: ${msg}`)
++        }
++    }
++
++    await PluginsLoader.deal(e)
++
++    let data = replies.join('\n')
++    if (data == "") {
++        await new Promise(r => setTimeout(r, 2000)); // sleep 2s
++        data = replies.join('\n')
++        if (data == "") {
++            data = "机器人似乎没有给出回复 :("
++        }
++    }
++    return data
++}
++
++
++function createEvent(user_id, text) {
++    return {
++        "test": true,
++        "self_id": 10000,
++        "time": 1676913595310,
++        "post_type": "message",
++        "message_type": "friend",
++        "sub_type": "normal",
++        "group_id": 111111,
++        "group_name": "测试群",
++        "user_id": user_id,
++        "anonymous": null,
++        "message": [
++            {
++                "type": "text",
++                "text": text
++            }
++        ],
++        "raw_message": "#uid",
++        "font": "微软雅黑",
++        "sender": {
++            "user_id": user_id,
++            "nickname": "测试",
++            "card": "this_is_card",
++            "sex": "male",
++            "age": 0,
++            "area": "unknown",
++            "level": 2,
++            "role": "owner",
++            "title": ""
++        },
++        "group": {
++            "mute_left": 0
++        },
++        "friend": {},
++        "message_id": "JzHU0DACliIAAAD3RzTh1WBOIC48"
++    }
++}
++
++async function processMessage(request, reply) {
++    logger.info(request.body)
++    const user_id = request.body.uid
++    const text = request.body.command
++
++    try {
++        const data = await generateResponse(user_id, text)
++        reply.send({ "text": data })
++    } catch (err) {
++        logger.error(`Error generating response: ${err}`)
++        reply.code(500).send({ "error": "Internal server error" })
++    }
++}
++
++fastify.post('/api/genshin', processMessage)
++
++fastify.listen({ port: 8000, host: '0.0.0.0' }, (err, address) => {
++    if (err) throw err
++})
 diff --git a/lib/config/init.js b/lib/config/init.js
 index 2dc0b3a..ddc713f 100644
 --- a/lib/config/init.js
