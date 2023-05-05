@@ -1,6 +1,6 @@
 <script setup>
 import { NInput, NButton, NSpace, NCard, NSpin, NInputNumber, NFormItem } from 'naive-ui'
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import MarkdownIt from 'markdown-it';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -19,7 +19,11 @@ const loading = ref(false);
 const onSubmit = async (isUid) => {
   try {
     loading.value = true;
-    let curCommand = isUid ? `#绑定${uid.value}` : (command.value || "#帮助");
+    let curCommand = command.value || "#帮助";
+    if (isUid) {
+      localStorage.setItem('uid', uid.value)
+      curCommand = `#绑定${uid.value}`
+    }
     const response = await fetch(`${API_BASE}/api/genshin`, {
       method: "POST",
       body: JSON.stringify({
@@ -42,13 +46,15 @@ const onSubmit = async (isUid) => {
   }
 };
 
+onMounted(() => {
+  uid.value = localStorage.getItem('uid')
+});
 </script>
 
 <template>
   <n-spin :show="loading">
     <div class="main">
       <n-space vertical>
-        <h1>原</h1>
         <h4>本项目仅供娱乐，请先点击绑定，#帮助 #喵喵帮助 查看指令</h4>
         <div style="display: inline-block;">
           <n-form-item label="UID" label-placement="left">
