@@ -29,6 +29,7 @@ COPY Yunzai-Bot /app/Yunzai-Bot
 RUN pnpm install -P
 RUN rm -rf /app/Yunzai-Bot/config/config && rm -rf /app/Yunzai-Bot/web-data/
 COPY miao-plugin /app/Yunzai-Bot/plugins/miao-plugin
+COPY StarRail-plugin /app/Yunzai-Bot/plugins/StarRail-plugin
 COPY dist/ /app/Yunzai-Bot/web-data/
 COPY config /app/Yunzai-Bot/config/config
 

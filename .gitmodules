@@ -4,3 +4,6 @@
 [submodule "miao-plugin"]
 	path = miao-plugin
 	url = https://gitee.com/yoimiya-kokomi/miao-plugin.git
+[submodule "StarRail-plugin"]
+	path = StarRail-plugin
+	url = https://github.com/hewang1an/StarRail-plugin.git
