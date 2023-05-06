@@ -12,10 +12,10 @@ index a66b0f6..da84d1d 100644
 +web-data
 diff --git a/index.js b/index.js
 new file mode 100644
-index 0000000..924f72a
+index 0000000..af764b6
 --- /dev/null
 +++ b/index.js
-@@ -0,0 +1,123 @@
+@@ -0,0 +1,170 @@
 +/* eslint-disable */
 +import path from 'path';
 +import * as fs from 'fs/promises'
@@ -135,6 +135,53 @@ index 0000000..924f72a
 +}
 +
 +fastify.post('/api/genshin', processMessage)
++
++
++async function processChat(request, reply) {
++    logger.info(request.body)
++    const user_id = request.body.uid
++    const text = request.body.command
++
++    try {
++        const e = createEvent(user_id, text)
++        e.group.pickMember = (qq) => { }
++        e.group.sendMsg = (msg) => logger.info(`group 回复内容 = ${msg}`)
++
++        const replies = []
++        const images = []
++        e.reply = async (msg) => {
++            logger.info(`reply 回复内容 = ${msg}`)
++            if (msg.type == 'image') {
++                const fileName = `${uuidv4()}.jpg`
++                const filePath = `./web-data/images/${fileName}`
++                fs.writeFile(filePath, msg.file, 'binary')
++                images.push(`/images/${fileName}`)
++            } else if (typeof msg == 'string') {
++                replies.push(`${msg}`)
++            } else {
++                logger.error(`unsupported msg: ${msg}`)
++            }
++        }
++
++        await PluginsLoader.deal(e)
++
++        let data = replies.join('\n')
++        if (data == "" && images.length == 0) {
++            await new Promise(r => setTimeout(r, 5000)); // sleep 2s
++            data = replies.join('\n')
++            if (data == "" && images.length == 0) {
++                data = "机器人似乎没有给出回复 :("
++            }
++        }
++        reply.send({ "text": data, "images": images })
++    } catch (err) {
++        logger.error(`Error generating response: ${err}`)
++        reply.code(500).send({ "error": "Internal server error" })
++    }
++
++}
++
++fastify.post('/api/chat', processChat)
 +
 +fastify.listen({ port: 8000, host: '0.0.0.0' }, (err, address) => {
 +    if (err) throw err
