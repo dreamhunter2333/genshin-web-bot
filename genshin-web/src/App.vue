@@ -1,6 +1,7 @@
 <script setup>
 import { NInput, NButton, NSpace, NCard, NSpin, NInputNumber, NFormItem } from 'naive-ui'
 import { onMounted, ref } from "vue";
+import api from '@/api/index';
 import MarkdownIt from 'markdown-it';
 
 const API_BASE = import.meta.env.VITE_API_BASE || "";
@@ -35,14 +36,17 @@ const onSubmit = async (commandType) => {
       localStorage.setItem('starRailUid', starRailUid.value)
       curCommand = `#绑定星铁${starRailUid.value}`
     }
-    const response = await fetch(`${API_BASE}/api/genshin`, {
-      method: "POST",
-      body: JSON.stringify({
-        uid: uid.value,
-        command: curCommand,
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
+
+    const response = await api.GetGenshin(uid.value, curCommand);
+
+    // const response = await fetch(`${API_BASE}/api/genshin`, {
+    //   method: "POST",
+    //   body: JSON.stringify({
+    //     uid: uid.value,
+    //     command: curCommand,
+    //   }),
+    //   headers: { "Content-Type": "application/json" },
+    // });
 
     if (!response.ok) {
       throw new Error(`${response.status} ${await response.text()}` || "请求失败");
